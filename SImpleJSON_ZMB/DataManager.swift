@@ -9,23 +9,34 @@
 import UIKit
 
 class DataManager: NSObject {
-    func getData() {
-        let urlString = "https://api.myjson.com/bins/cgiym"
-        let actualURL = URL(string: urlString)
+    
+    let MYJSONURL = "https://api.myjson.com/bins/lnjpe"
+    var dataArray = ["No data"]
+    
+    func getData(completion: @escaping (_ success: Bool) -> ()) {
+
+        var success = true
+       // let urlString = "https://api.myjson.com/bins/cgiym"
+        let actualURL = URL(string: MYJSONURL)
         let session = URLSession.shared
+ 
         let task = session.dataTask(with: actualURL!) { (data, response, error) in
             
-            if error != nil {
-                //handle the error
+            if let _ = data, error == nil {
+                if let jsonObj = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments) as? NSDictionary {
+                    if let veggieArray = jsonObj!.value(forKey: "characters") as? Array<String> {
+                        self.dataArray = veggieArray
+                        
+                        print(jsonObj!.value(forKey: "characters")!)
+                    }
+                }
+            } else {
+                success = false
             }
-            
-            if let successfulData = data {
-                print(String(data: successfulData, encoding: String.Encoding.ascii))
-            }
-            
+            completion(success)
         }
         task.resume()
-        
+    
     }
     
 }
